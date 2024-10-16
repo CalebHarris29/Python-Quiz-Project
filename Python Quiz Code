@@ -1,0 +1,87 @@
+from tkinter import *
+from tkinter import messagebox as mb
+import json
+
+class PythonTest: #created quiz to keep track of functions
+    def __init__(self): #initializes instance of the class
+        self.q_number = 0 #keeps track of current question number
+        self.opt_selected = IntVar() #keeps track of the option selected
+        self.opts = self.create_radio_buttons()
+        self.display_options()
+        self.display_buttons()
+        self.question_count = len(questions)
+        self.correct_count = 0
+        self.display_title()#displays the title
+        self.display_question()# displays the questions
+    def display_result(self):
+        wrong_count = self.question_count - self.correct_count
+        correct = f"Correct: {self.correct_count}"
+        wrong = f"Wrong: {wrong_count}"
+        score = int(self.correct_count / self.question_count * 100)
+        result = f"Score: {score}%"
+        mb.showinfo("Result", f"{result}\n{correct}\n{wrong}")
+        #responsible for displaying the result at the end by keeping track of the correct and incorrect answers
+    def check_answer(self, q_num):
+        return self.opt_selected.get() == correct_answers[q_num]
+       #checks if the option selected is equal to the correct answer
+    def next_button(self):
+        if self.check_answer(self.q_number):
+            self.correct_count += 1
+        self.q_number += 1
+        if self.q_number == self.question_count:
+            self.display_result()
+            gui.destroy()
+        else:
+            self.display_question()
+            self.display_options()
+# allows the next button go to the next question while keeping track of the if the answer is correct or incorrect
+    def display_buttons(self):
+        next_btn = Button(gui, text="Next", command=self.next_button,
+                          width=10, bg="dark olive green", fg="black", font=("ariel", 16, "bold")) #customizing the size and color of the next button
+        next_btn.place(x=350, y=390)
+
+        quit_btn = Button(gui, text="Quit", command=gui.destroy,
+                          width=5, bg="gray", fg="red", font=("ariel", 16, " bold"))
+        quit_btn.place(x=700, y=50)
+        #responsible for quit button size, color, and placement
+    def display_options(self):
+        val = 0
+        self.opt_selected.set(0)
+        for option in options[self.q_number]:
+            self.opts[val]['text'] = option
+            val += 1
+
+    def display_question(self):
+        q_num = Label(gui, text=questions[self.q_number], width=60,
+                      font=('ariel', 16, 'bold'), anchor='w')
+        q_num.place(x=70, y=100) #responible for how the questions are presented 
+
+    def display_title(self):
+        title = Label(gui, text="Python Test",
+                      width=50, fg="black", font=("ariel", 20, "bold"))
+        title.place(x=90, y=20)
+
+    def create_radio_buttons(self):
+        q_list = []
+        y_pos = 150
+        while len(q_list) < 4:
+            radio_btn = Radiobutton(gui, text=" ", variable=self.opt_selected,
+                                    value=len(q_list) + 1, font=("ariel", 14))
+            q_list.append(radio_btn)
+            radio_btn.place(x=100, y=y_pos)
+            y_pos += 40
+        return q_list
+
+gui = Tk() # creates the main window for the GUi application 
+gui.geometry("800x450") # creates the size of the window 
+gui.title("Python Test")# responible for the title of the quiz as defined earlier in my Python Test class 
+
+with open('./data.json') as f:
+    data = json.load(f) #responible for opeing and reading the json file, program will not run without this as it needs this information to print out the questions and answers
+
+questions = (data['question']) 
+options = (data['options'])
+correct_answers = (data['answer'])
+#extracting information from the json file and storing it in variables 
+quiz = PythonTest()# responsible for keeping the application up and running and resposnive to the users input 
+gui.mainloop()# starts the guis main loop which starts the quiz 
